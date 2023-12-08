@@ -1,0 +1,52 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using {selectns}.{nameofPlural}.DTOs;
+using {selectns}.{nameofPlural}.Specifications;
+using {selectns}.{nameofPlural}.Queries.Pagination;
+
+namespace {namespace};
+
+public class Export{nameofPlural}Query : {itemname}AdvancedFilter, IRequest<Result<byte[]>>
+{
+      public {itemname}AdvancedSpecification Specification => new {itemname}AdvancedSpecification(this);
+}
+    
+public class Export{nameofPlural}QueryHandler :
+         IRequestHandler<Export{nameofPlural}Query, Result<byte[]>>
+{
+        private readonly IApplicationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly IExcelService _excelService;
+        private readonly IStringLocalizer<Export{nameofPlural}QueryHandler> _localizer;
+        private readonly {itemname}Dto _dto = new();
+        public Export{nameofPlural}QueryHandler(
+            IApplicationDbContext context,
+            IMapper mapper,
+            IExcelService excelService,
+            IStringLocalizer<Export{nameofPlural}QueryHandler> localizer
+            )
+        {
+            _context = context;
+            _mapper = mapper;
+            _excelService = excelService;
+            _localizer = localizer;
+        }
+        #nullable disable warnings
+        public async Task<Result<byte[]>> Handle(Export{nameofPlural}Query request, CancellationToken cancellationToken)
+        {
+            var data = await _context.{nameofPlural}.ApplySpecification(request.Specification)
+                       .OrderBy($"{request.OrderBy} {request.SortDirection}")
+                       .ProjectTo<{itemname}Dto>(_mapper.ConfigurationProvider)
+                       .AsNoTracking()
+                       .ToListAsync(cancellationToken);
+            var result = await _excelService.ExportAsync(data,
+                new Dictionary<string, Func<{itemname}Dto, object?>>()
+                {
+                    // TODO: Define the fields that should be exported, for example:
+                    {exportFuncExpression}
+                }
+                , _localizer[_dto.GetClassDescription()]);
+            return await Result<byte[]>.SuccessAsync(result);
+        }
+}
