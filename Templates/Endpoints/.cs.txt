@@ -1,0 +1,47 @@
+﻿using {applicaitonRootNs}.Features.{nameofPlural}.Commands;
+using {applicaitonRootNs}.Features.{nameofPlural}.Queries;
+
+namespace {namespace};
+
+public class {nameofPlural} : EndpointGroupBase
+{
+    public override void Map(WebApplication app)
+    {
+        app.MapGroup(this)
+            .RequireAuthorization()
+            .MapGet(GetAll)
+            .MapPost(Create)
+            .MapGet(GetById, "{id}")
+            .MapPut(Update)
+            .MapDelete(Delete, "{id}");
+    }
+
+    public async Task<PaginatedList<{itemname}Response>> GetAll(ISender sender, [AsParameters] GetAll{nameofPlural}Query query)
+    {
+        return await sender.Send(query);
+    }
+
+    public async Task<{itemname}Response> GetById(ISender sender, int id)
+    {
+        return await sender.Send(new Get{itemname}ByIdQuery(id));
+    }
+
+    public async Task<int> Create(ISender sender, Create{itemname}Command command)
+    {
+        return await sender.Send(command);
+    }
+
+    public async Task<IResult> Update(ISender sender, int id, Update{itemname}Command command)
+    {
+        if (id != command.Id) return Results.BadRequest();
+        await sender.Send(command);
+        return Results.NoContent();
+    }
+
+    public async Task<IResult> Delete(ISender sender, int id)
+    {
+        await sender.Send(new Delete{itemname}Command(id));
+        return Results.NoContent();
+    }
+}
+

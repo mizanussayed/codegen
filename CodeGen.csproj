@@ -75,43 +75,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\AddApplicationInsights.png" />
-    <Content Include="Templates\.bowerrc.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Templates\.cs-interface.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Templates\.html.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\.json.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\.md.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\.razor.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\.vb-interface.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\.vb.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\bower.json.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Templates\Caching\.cachekey.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Commands\AddEdit\.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Commands\AddEdit\.validator.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\Commands\Create\.cs.txt">
@@ -123,15 +93,6 @@
     <Content Include="Templates\Commands\Delete\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Templates\Commands\Delete\.validator.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Commands\Import\.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Commands\Import\.validator.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Templates\Commands\Update\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -139,6 +100,9 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\DTOs\.dto.cs.txt">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Templates\Endpoints\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\EventHandlers\.created.cs.txt">
@@ -159,28 +123,7 @@
     <Content Include="Templates\Events\.updatedevent.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Templates\gruntfile.js.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\gulpfile.js.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\package.json.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Pages\.razor.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Pages\Components\.advancedsearchcomponent.razor.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Pages\Components\.formdialog.razor.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Persistence\Configurations\.configuration.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\Queries\Export\.cs.txt">
+    <Content Include="Templates\Data\Configurations\.configuration.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\Queries\GetAll\.cs.txt">
@@ -189,7 +132,7 @@
     <Content Include="Templates\Queries\GetById\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Templates\Queries\Pagination\.cs.txt">
+    <Content Include="Templates\Queries\Response\.response.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\Specifications\AdvancedFilter.cs.txt">
@@ -249,6 +192,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

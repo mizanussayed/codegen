@@ -1,0 +1,15 @@
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using {domainRootNs}.Entities;
+
+namespace {namespace};
+
+public class {itemname}Configuration : IEntityTypeConfiguration<{itemname}>
+{
+    public void Configure(EntityTypeBuilder<{itemname}> builder)
+    {
+        builder.Property(t => t.Name).HasMaxLength(50).IsRequired();
+        //builder.Ignore(e => e.DomainEvents);
+    }
+}
+
+

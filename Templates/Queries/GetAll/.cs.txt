@@ -1,42 +1,21 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using {selectns}.{nameofPlural}.DTOs;
-using {selectns}.{nameofPlural}.Caching;
+﻿using {applicaitonRootNs}.Common.Interfaces;
+using {applicaitonRootNs}.Common.Mappings;
+using {applicaitonRootNs}.Common.Models;
 
 namespace {namespace};
 
-public class GetAll{nameofPlural}Query : ICacheableRequest<IEnumerable<{itemname}Dto>>
+public record GetAll{nameofPlural}Query(int PageNumber = 1, int PageSize = 10) 
+     : IRequest<PaginatedList<{itemname}Response>>;
+
+internal sealed class GetAll{nameofPlural}QueryHandler(IApplicationDbContext _context, IMapper _mapper) 
+     : IRequestHandler<GetAll{nameofPlural}Query, PaginatedList<{itemname}Response>>
 {
-   public string CacheKey => {itemname}CacheKey.GetAllCacheKey;
-   public MemoryCacheEntryOptions? Options => {itemname}CacheKey.MemoryCacheEntryOptions;
-}
-
-public class GetAll{nameofPlural}QueryHandler :
-     IRequestHandler<GetAll{nameofPlural}Query, IEnumerable<{itemname}Dto>>
-{
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IStringLocalizer<GetAll{nameofPlural}QueryHandler> _localizer;
-
-    public GetAll{nameofPlural}QueryHandler(
-        IApplicationDbContext context,
-        IMapper mapper,
-        IStringLocalizer<GetAll{nameofPlural}QueryHandler> localizer
-        )
+    public async Task<PaginatedList<{itemname}Response>> Handle(GetAll{nameofPlural}Query request, CancellationToken cancellationToken)
     {
-        _context = context;
-        _mapper = mapper;
-        _localizer = localizer;
-    }
-
-    public async Task<IEnumerable<{itemname}Dto>> Handle(GetAll{nameofPlural}Query request, CancellationToken cancellationToken)
-    {
-        var data = await _context.{nameofPlural}
-                     .ProjectTo<{itemname}Dto>(_mapper.ConfigurationProvider)
-                     .AsNoTracking()
-                     .ToListAsync(cancellationToken);
-        return data;
+        return await _context.{nameofPlural}
+            .OrderBy(x => x.Id)
+            .ProjectTo<{itemname}Response>(_mapper.ConfigurationProvider)
+            .PaginatedListAsync(request.PageNumber, request.PageSize);
     }
 }
 

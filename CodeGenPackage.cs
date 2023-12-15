@@ -28,13 +28,18 @@ namespace CodeGen;
 public sealed class CodeGenPackage : AsyncPackage
 {
     public const string DOMAINPROJECT = "Domain";
-    public const string UIPROJECT = "Server.UI";
+    public const string UIPROJECT = "Web";
     public const string INFRASTRUCTUREPROJECT = "Infrastructure";
     public const string APPLICATIONPROJECT = "Application";
 
     private const string _solutionItemsProjectName = "Solution Items";
-    private static readonly Regex _reservedFileNamePattern = new ($@"(?i)^(PRN|AUX|NUL|CON|COM\d|LPT\d)(\.|$)");
-    private static readonly HashSet<char> _invalidFileNameChars = new (Path.GetInvalidFileNameChars());
+    private static readonly Regex _reservedFileNamePattern = new($@"(?i)^(PRN|AUX|NUL|CON|COM\d|LPT\d)(\.|$)");
+    private static readonly HashSet<char> _invalidFileNameChars = new(Path.GetInvalidFileNameChars());
+
+    public static string DomainRootNs = "";
+    public static string ApplicaitonRootNs = "";
+    public static string InfrastructureRootNs = "";
+    public static string WebRootNs = "";
 
     public static DTE2 _dte;
 
@@ -49,8 +54,8 @@ public sealed class CodeGenPackage : AsyncPackage
 
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
         {
-            CommandID menuCommandID = new (PackageGuids.CodeGen, PackageIds.MyCommand);
-            OleMenuCommand menuItem = new (Execute, menuCommandID);
+            CommandID menuCommandID = new(PackageGuids.CodeGen, PackageIds.MyCommand);
+            OleMenuCommand menuItem = new(Execute, menuCommandID);
             mcs.AddCommand(menuItem);
         }
     }
@@ -61,6 +66,13 @@ public sealed class CodeGenPackage : AsyncPackage
         NewItemTarget domain = NewItemTarget.Create(_dte, DOMAINPROJECT);
         NewItemTarget infrastructure = NewItemTarget.Create(_dte, INFRASTRUCTUREPROJECT);
         NewItemTarget ui = NewItemTarget.Create(_dte, UIPROJECT);
+        NewItemTarget application = NewItemTarget.Create(_dte, APPLICATIONPROJECT);
+
+        DomainRootNs = domain.Project.GetRootNamespace();
+        ApplicaitonRootNs = application.Project.GetRootNamespace();
+        InfrastructureRootNs = infrastructure.Project.GetRootNamespace();
+        WebRootNs = ui.Project.GetRootNamespace();
+
         var includes = new string[] { "IEntity", "BaseEntity", "BaseAuditableEntity", "BaseAuditableSoftDeleteEntity", "AuditTrail", "OwnerPropertyEntity" };
         var objectlist = ProjectHelpers.GetEntities(domain.Project)
             .Where(x => includes.Contains(x.BaseName) && !includes.Contains(x.Name));
@@ -91,17 +103,20 @@ public sealed class CodeGenPackage : AsyncPackage
                 var name = Path.GetFileNameWithoutExtension(inputname);
                 var nameofPlural = ProjectHelpers.Pluralize(name);
                 var objectClass = objectlist.Where(x => x.Name == name).First();
-                var events = new List<string>() {
-                        $"Events/{name}CreatedEvent.cs",
-                        $"Events/{name}DeletedEvent.cs",
-                        $"Events/{name}UpdatedEvent.cs",
-                        };
-                foreach (var item in events)
-                {
-                    AddItemAsync(objectClass, item, name, domain).Forget();
-                }
+
+                // For Domain Event
+                //var events = new List<string>() {
+                //        $"Events/{name}CreatedEvent.cs",
+                //        $"Events/{name}DeletedEvent.cs",
+                //        $"Events/{name}UpdatedEvent.cs",
+                //        };
+                //foreach (var item in events)
+                //{
+                //    AddItemAsync(objectClass, item, name, domain).Forget();
+                //}
+
                 var configurations = new List<string>() {
-                         $"Persistence/Configurations/{name}Configuration.cs"
+                         $"Data/Configurations/{name}Configuration.cs"
                         };
                 foreach (var item in configurations)
                 {
@@ -110,28 +125,30 @@ public sealed class CodeGenPackage : AsyncPackage
 
                 var list = new List<string>()
                     {
-                        $"{nameofPlural}/Commands/AddEdit/AddEdit{name}Command.cs",
-                        $"{nameofPlural}/Commands/AddEdit/AddEdit{name}CommandValidator.cs",
+                        //$"{nameofPlural}/Commands/AddEdit/AddEdit{name}Command.cs",
+                        //$"{nameofPlural}/Commands/AddEdit/AddEdit{name}CommandValidator.cs",
                         $"{nameofPlural}/Commands/Create/Create{name}Command.cs",
                         $"{nameofPlural}/Commands/Create/Create{name}CommandValidator.cs",
                         $"{nameofPlural}/Commands/Delete/Delete{name}Command.cs",
-                        $"{nameofPlural}/Commands/Delete/Delete{name}CommandValidator.cs",
+                        //$"{nameofPlural}/Commands/Delete{name}CommandValidator.cs",
                         $"{nameofPlural}/Commands/Update/Update{name}Command.cs",
                         $"{nameofPlural}/Commands/Update/Update{name}CommandValidator.cs",
-                        $"{nameofPlural}/Commands/Import/Import{nameofPlural}Command.cs",
-                        $"{nameofPlural}/Commands/Import/Import{nameofPlural}CommandValidator.cs",
-                        $"{nameofPlural}/Caching/{name}CacheKey.cs",
-                        $"{nameofPlural}/DTOs/{name}Dto.cs",
-                        $"{nameofPlural}/EventHandlers/{name}CreatedEventHandler.cs",
-                        $"{nameofPlural}/EventHandlers/{name}UpdatedEventHandler.cs",
-                        $"{nameofPlural}/EventHandlers/{name}DeletedEventHandler.cs",
-                        $"{nameofPlural}/Specifications/{name}AdvancedFilter.cs",
-                        $"{nameofPlural}/Specifications/{name}AdvancedSpecification.cs",
-                        $"{nameofPlural}/Specifications/{name}ByIdSpecification.cs",
-                        $"{nameofPlural}/Queries/Export/Export{nameofPlural}Query.cs",
+                        //$"{nameofPlural}/Commands/Import/Import{nameofPlural}Command.cs",
+                        //$"{nameofPlural}/Commands/Import/Import{nameofPlural}CommandValidator.cs",
+                        //$"{nameofPlural}/Caching/{name}CacheKey.cs",
+                        //$"{nameofPlural}/DTOs/{name}Dto.cs",
+                        //$"{nameofPlural}/EventHandlers/{name}CreatedEventHandler.cs",
+                        //$"{nameofPlural}/EventHandlers/{name}UpdatedEventHandler.cs",
+                        //$"{nameofPlural}/EventHandlers/{name}DeletedEventHandler.cs",
+                        //$"{nameofPlural}/Specifications/{name}AdvancedFilter.cs",
+                        //$"{nameofPlural}/Specifications/{name}AdvancedSpecification.cs",
+                        //$"{nameofPlural}/Specifications/{name}ByIdSpecification.cs",
+                        //$"{nameofPlural}/Queries/Export/Export{nameofPlural}Query.cs",
                         $"{nameofPlural}/Queries/GetAll/GetAll{nameofPlural}Query.cs",
                         $"{nameofPlural}/Queries/GetById/Get{name}ByIdQuery.cs",
-                        $"{nameofPlural}/Queries/Pagination/{nameofPlural}PaginationQuery.cs",
+                        $"{nameofPlural}/Queries/Response/{name}Response.cs"
+                        
+                        //$"{nameofPlural}/Queries/Pagination/{nameofPlural}PaginationQuery.cs",
 
                     };
                 foreach (var item in list)
@@ -139,17 +156,15 @@ public sealed class CodeGenPackage : AsyncPackage
                     AddItemAsync(objectClass, item, name, target).Forget();
                 }
 
+                // Add Endpoints
                 var pages = new List<string>()
                     {
-                        $"Pages/{nameofPlural}/{nameofPlural}.razor",
-                        $"Pages/{nameofPlural}/Components/{name}FormDialog.razor",
-                        $"Pages/{nameofPlural}/Components/{nameofPlural}AdvancedSearchComponent.razor"
+                        $"Endpoints/{nameofPlural}.cs",
                     };
                 foreach (var item in pages)
                 {
                     AddItemAsync(objectClass, item, name, ui).Forget();
                 }
-
             }
             catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
             {
@@ -210,6 +225,7 @@ public sealed class CodeGenPackage : AsyncPackage
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync();
         FileInfo file;
+        FileInfo orgFile = null;
 
         // If the file is being added to a solution folder, but that
         // solution folder doesn't have a corresponding directory on
@@ -220,14 +236,26 @@ public sealed class CodeGenPackage : AsyncPackage
         }
         else
         {
-            file = new FileInfo(Path.Combine(target.Directory, name));
+            var removedFolderName = RemoveFolderNameFromFile(name);
+            file = new FileInfo(Path.Combine(target.Directory, removedFolderName));
+            orgFile = new FileInfo(Path.Combine(target.Directory, name));
         }
 
         // Make sure the directory exists before we create the file. Don't use
         // `PackageUtilities.EnsureOutputPath()` because it can silently fail.
+        //var removedFolderName = "";
+        //try
+        //{
+        //     removedFolderName = RemoveFolderNameFromFile(file.DirectoryName, 0);
+        //}
+        //catch (Exception ex)
+        //{
+
+        //    throw;
+        //}
         Directory.CreateDirectory(file.DirectoryName);
 
-        if (!file.Exists)
+        if (!file.Exists && orgFile is not null)
         {
             Project project;
 
@@ -240,7 +268,7 @@ public sealed class CodeGenPackage : AsyncPackage
                 project = target.Project;
             }
 
-            int position = await WriteFileAsync(project, classObject, file.FullName, itemname, target.Directory);
+            int position = await WriteFileAsync(project, classObject, orgFile.FullName, itemname, target.Directory);
             if (target.ProjectItem != null && target.ProjectItem.IsKind(Constants.vsProjectItemKindVirtualFolder))
             {
                 target.ProjectItem.ProjectItems.AddFromFile(file.FullName);
@@ -276,7 +304,8 @@ public sealed class CodeGenPackage : AsyncPackage
         if (!string.IsNullOrEmpty(template))
         {
             int index = template.IndexOf('$');
-            await WriteToDiskAsync(file, template);
+            string modifiedFile = RemoveFolderNameFromFile(file);
+            await WriteToDiskAsync(modifiedFile, template);
             return index;
         }
 
@@ -285,9 +314,51 @@ public sealed class CodeGenPackage : AsyncPackage
         return 0;
     }
 
+    public static string RemoveFolderNameFromFile(string file, int tailSlashRemove = 1)
+    {
+        string folderName = string.Empty;
+
+        bool containsCommands = file.Contains("Commands");
+        bool containsQueries = file.Contains("Queries");
+
+        if (!containsCommands && !containsQueries)
+        {
+            return file;
+        }
+
+        if (file.Contains("Create"))
+        {
+            folderName = "Create";
+        }
+        if (file.Contains("Update"))
+        {
+            folderName = "Update";
+        }
+        if (file.Contains("Delete"))
+        {
+            folderName = "Delete";
+        }
+        if (file.Contains("GetAll"))
+        {
+            folderName = "GetAll";
+        }
+        if (file.Contains("GetById"))
+        {
+            folderName = "GetById";
+        }
+        if (file.Contains("Response"))
+        {
+            folderName = "Response";
+        }
+        int indexOfFolderName = file.IndexOf(folderName);
+        StringBuilder modifiedFile = new(file.Substring(0, indexOfFolderName));
+        modifiedFile.Append(file.Substring(indexOfFolderName + folderName.Length + tailSlashRemove));
+        return modifiedFile.ToString();
+    }
+
     private static async Task WriteToDiskAsync(string file, string content)
     {
-        using StreamWriter writer = new (file, false, GetFileEncoding(file));
+        using StreamWriter writer = new(file, false, GetFileEncoding(file));
         await writer.WriteAsync(content);
     }
 
@@ -375,7 +446,7 @@ public sealed class CodeGenPackage : AsyncPackage
 
     private static string[] GetParsedInput(string input)
     {
-        Regex pattern = new (@"[,]?([^(,]*)([\.\/\\]?)[(]?((?<=[^(])[^,]*|[^)]+)[)]?");
+        Regex pattern = new(@"[,]?([^(,]*)([\.\/\\]?)[(]?((?<=[^(])[^,]*|[^)]+)[)]?");
         List<string> results = [];
         Match match = pattern.Match(input);
 

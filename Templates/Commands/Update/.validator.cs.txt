@@ -1,16 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-namespace {namespace};
+﻿namespace {namespace};
 
 public class Update{itemname}CommandValidator : AbstractValidator<Update{itemname}Command>
 {
-        public Update{itemname}CommandValidator()
-        {
-           RuleFor(v => v.Id).NotNull();
-           RuleFor(v => v.Name).MaximumLength(256).NotEmpty();
-          
-        }
-    
+     public Update{itemname}CommandValidator()
+     {
+        RuleFor(v => v.Id).NotNull();
+        RuleFor(v => v.Name).MaximumLength(256).NotEmpty();
+       
+     }  
 }
 
