@@ -35,7 +35,7 @@ public partial class FileNameDialog : Window
         icon.BeginInit();
         icon.UriSource = new Uri("pack://application:,,,/CodeGen;component/Resources/AddApplicationInsights.png");
         icon.EndInit();
-        Title = Vsix.Name;
+        Title = "Code Generation CA";
         SetRandomTip();
     };
     }
