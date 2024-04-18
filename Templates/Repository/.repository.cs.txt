@@ -1,0 +1,14 @@
+﻿using Lib.ErrorOr;
+
+using {domainRootNs}.{nameofPlural}.Entity;
+
+namespace {namespace};
+
+public interface I{itemName}Repository
+{
+    Task<ErrorOr<IEnumerable<{itemName}>>> GetAllAsync(CancellationToken cancellationToken);
+    Task<ErrorOr<{itemName}?>> GetAsync(long id, CancellationToken cancellationToken);
+    Task<ErrorOr<bool>> CreateAsync({itemName} entity, CancellationToken cancellationToken);
+    Task<ErrorOr<bool>> UpdateAsync({itemName} entity, CancellationToken cancellationToken);
+    Task<ErrorOr<bool>> DeleteAsync(long id, CancellationToken cancellationToken);
+}

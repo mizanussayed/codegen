@@ -1,0 +1,15 @@
+﻿using FluentValidation;
+
+using {domainRootNs}.{nameofPlural}.Model;
+
+namespace {domainRootNs}.{nameofPlural}.Validators;
+
+public sealed class {itemName}RequestModelValidator : AbstractValidator<{itemName}RequestModel>
+{
+    public {itemName}RequestModelValidator()
+    {
+     //   RuleFor(x => x.BPartyCustomerName)
+     //      .NotEmpty()
+     //      .WithMessage("B Party Customer Name is required");
+    }
+}

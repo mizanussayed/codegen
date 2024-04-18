@@ -8,7 +8,6 @@ using CodeGen.Services;
 using EnvDTE;
 using EnvDTE80;
 
-
 namespace CodeGen.Models;
 
 public static class IntellisenseParser

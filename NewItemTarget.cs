@@ -9,7 +9,6 @@ using System.IO;
 namespace CodeGen;
 public sealed class NewItemTarget
 {
-
     private NewItemTarget(string directory, Project project, ProjectItem projectItem, bool isSolutionOrSolutionFolder)
     {
         Directory = directory;
@@ -19,15 +18,10 @@ public sealed class NewItemTarget
     }
 
     public string Directory { get; }
-
     public Project Project { get; }
-
     public ProjectItem ProjectItem { get; }
-
     public bool IsSolutionOrSolutionFolder { get; }
-
     public bool IsSolution => IsSolutionOrSolutionFolder && Project == null;
-
     public bool IsSolutionFolder => IsSolutionOrSolutionFolder && Project != null;
     public static NewItemTarget Create(DTE2 dte)
     {

@@ -35,21 +35,15 @@ internal static class TemplateMap
 
     public static async Task<string> GetTemplateFilePathAsync(Project project, IntellisenseObject classObject, string file, string itemname, string selectFolder)
     {
-        var templatefolders = new string[]{
-            //"Commands\\AcceptChanges",
-			"Commands\\Create",
-            "Commands\\Delete",
-            "Commands\\Update",
-            //"DTOs",
-            "Caching",
-            "EventHandlers",
-            "Events",
-            "Specification",
-            "Queries\\GetAll",
-            "Queries\\GetById",
-            "Queries\\Response",
-            "Data\\Configurations",
-            "Endpoints"
+        var templateFolders = new string[]{
+           // "Queries\\GetAll",
+            "Model",
+            "Repository",
+            "Service",
+            "Validator",
+            "CoreResolver",
+            "Infrastructure",
+            "Controllers"
             };
         var extension = Path.GetExtension(file).ToLowerInvariant();
         var name = Path.GetFileName(file);
@@ -67,7 +61,7 @@ internal static class TemplateMap
         // Look for direct file name matches
         if (list.Any(f =>
         {
-            var pattern = templatefolders
+            var pattern = templateFolders
                 .Where(x => relative.IndexOf(x, StringComparison.OrdinalIgnoreCase) >= 0)
                 .First()
                 .Replace("\\", "\\\\");
@@ -76,11 +70,10 @@ internal static class TemplateMap
 
         }))
         {
-            var ords = list.OrderByDescending(x => x.Length);
 
-            var tmplFile = list.OrderByDescending(x => x.Length).FirstOrDefault(f =>
+            var tampFile = list.OrderByDescending(x => x.Length).FirstOrDefault(f =>
             {
-                var pattern = templatefolders
+                var pattern = templateFolders
                     .Where(x => relative.IndexOf(x, StringComparison.OrdinalIgnoreCase) >= 0)
                     .First()
                     .Replace("\\", "\\\\");
@@ -89,23 +82,23 @@ internal static class TemplateMap
 
                 if (result)
                 {
-                  var fileName =  Path.GetFileNameWithoutExtension(f)
-                        .Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries)
-                        .All(x => name.IndexOf(x, StringComparison.OrdinalIgnoreCase) >= 0);
+                    var fileName = Path.GetFileNameWithoutExtension(f)
+                          .Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries)
+                          .All(x => name.IndexOf(x, StringComparison.OrdinalIgnoreCase) >= 0);
 
                     return fileName;
                 }
                 return false;
             });
-            templateFile = tmplFile;
+            templateFile = tampFile;
         }
 
         // Look for file extension matches
         else if (list.Any(f => Path.GetFileName(f).Equals(extension + _defaultExt, StringComparison.OrdinalIgnoreCase)))
         {
-            var tmplFile = list.FirstOrDefault(f => Path.GetFileName(f).Equals(extension + _defaultExt, StringComparison.OrdinalIgnoreCase) && File.Exists(f));
-            var tmpl = AdjustForSpecific(safeName, extension);
-            templateFile = Path.Combine(Path.GetDirectoryName(tmplFile), tmpl + _defaultExt);
+            var tempFile = list.FirstOrDefault(f => Path.GetFileName(f).Equals(extension + _defaultExt, StringComparison.OrdinalIgnoreCase) && File.Exists(f));
+            var tamp = AdjustForSpecific(safeName, extension);
+            templateFile = Path.Combine(Path.GetDirectoryName(tempFile), tamp + _defaultExt);
         }
         var modifiedRelativePath = CodeGenPackage.RemoveFolderNameFromFile(relative, 0);
         var template = await ReplaceTokensAsync(project, classObject, itemname, modifiedRelativePath, selectRelative, templateFile);
@@ -118,11 +111,11 @@ internal static class TemplateMap
         var dynaList = new List<string>();
         while (current != null)
         {
-            var tmplDir = Path.Combine(current.FullName, _templateDir);
+            var tempDir = Path.Combine(current.FullName, _templateDir);
 
-            if (Directory.Exists(tmplDir))
+            if (Directory.Exists(tempDir))
             {
-                dynaList.AddRange(Directory.GetFiles(tmplDir, "*" + _defaultExt, SearchOption.AllDirectories));
+                dynaList.AddRange(Directory.GetFiles(tempDir, "*" + _defaultExt, SearchOption.AllDirectories));
             }
             current = current.Parent;
         }
@@ -136,19 +129,16 @@ internal static class TemplateMap
             return templateFile;
         }
 
-        var domainRootNs = CodeGenPackage.DomainRootNs;
-        var applicaitonRootNs = CodeGenPackage.ApplicaitonRootNs;
+        var domainRootNs = CodeGenPackage.CoreRootNs;
         var infrastructureRootNs = CodeGenPackage.InfrastructureRootNs;
-        var webRootNs = CodeGenPackage.WebRootNs;
+        var apiRootNs = CodeGenPackage.ApiRootNs;
 
         var rootNs = project.GetRootNamespace();
-        //var rootNs2 = project.GetRootNamespace().Split('.').LastOrDefault();
         var ns = string.IsNullOrEmpty(rootNs) ? "MyNamespace" : rootNs;
         var selectNs = ns;
         if (!string.IsNullOrEmpty(relative))
         {
             ns += "." + ProjectHelpers.CleanNameSpace(relative);
-            ns = ns.Remove(ns.Length - 1);
         }
         if (!string.IsNullOrEmpty(selectRelative))
         {
@@ -159,25 +149,22 @@ internal static class TemplateMap
         var content = await reader.ReadToEndAsync();
         var nameofPlural = ProjectHelpers.Pluralize(name);
         var dtoFieldDefinition = CreateDtoFieldDefinition(classObject);
-        var importFuncExpression = CreateImportFuncExpression(classObject);
         var templateFieldDefinition = CreateTemplateFieldDefinition(classObject);
-        var exportFuncExpression = CreateExportFuncExpression(classObject);
         var fieldAssignmentDefinition = CreateFieldAssignmentDefinition(classObject);
 
         return content.Replace("{rootnamespace}", _defaultNamespace)
                         .Replace("{namespace}", ns)
                         .Replace("{selectns}", selectNs)
-                        .Replace("{itemname}", name)
+                        .Replace("{itemName}", name)
+                        .Replace("{itemNameUpper}", name.ToUpper())
+                        .Replace("{itemNameLower}", name.ToLower())
                         .Replace("{nameofPlural}", nameofPlural)
                         .Replace("{dtoFieldDefinition}", dtoFieldDefinition)
                         .Replace("{fieldAssignmentDefinition}", fieldAssignmentDefinition)
-                        .Replace("{importFuncExpression}", importFuncExpression)
                         .Replace("{templateFieldDefinition}", templateFieldDefinition)
-                        .Replace("{exportFuncExpression}", exportFuncExpression)
                         .Replace("{domainRootNs}", domainRootNs)
                         .Replace("{infrastructureRootNs}", infrastructureRootNs)
-                        .Replace("{webRootNs}", webRootNs)
-                        .Replace("{applicaitonRootNs}", applicaitonRootNs)
+                        .Replace("{apiRootNs}", apiRootNs)
                         ;
     }
 
@@ -214,29 +201,28 @@ internal static class TemplateMap
         var output = new StringBuilder();
         foreach (var property in classObject.Properties.Where(x => x.Type.IsKnownType == true))
         {
-            //output.Append($"    [Description(\"{SplitCamelCase(property.Name)}\")]\r\n");
             if (property.Name == PRIMARYKEY)
             {
-                output.Append($"    public {property.Type.CodeName} {property.Name} {{get;set;}} \r\n");
+                output.Append($"    public {property.Type.CodeName} {property.Name} {{ get;set; }} \r\n");
             }
             else
             {
                 switch (property.Type.CodeName)
                 {
                     case "string" when property.Name.Equals("Name", StringComparison.OrdinalIgnoreCase):
-                        output.Append($"    public {property.Type.CodeName} {property.Name} {{get;set;}} = string.Empty; \r\n");
+                        output.Append($"public {property.Type.CodeName} {property.Name} {{ get;set; }} = string.Empty; \r\n");
                         break;
                     case "string" when !property.Name.Equals("Name", StringComparison.OrdinalIgnoreCase) && !property.Type.IsArray && !property.Type.IsDictionary:
-                        output.Append($"    public {property.Type.CodeName}? {property.Name} {{get;set;}} \r\n");
+                        output.Append($"public {property.Type.CodeName}? {property.Name} {{ get;set; }} \r\n");
                         break;
                     case "string" when !property.Name.Equals("Name", StringComparison.OrdinalIgnoreCase) && property.Type.IsArray:
-                        output.Append($"    public HashSet<{property.Type.CodeName}>? {property.Name} {{get;set;}} \r\n");
+                        output.Append($"    public HashSet<{property.Type.CodeName}>? {property.Name} {{ get;set; }} \r\n");
                         break;
                     case "System.DateTime?":
-                        output.Append($"    public DateTime? {property.Name} {{get;set;}} \r\n");
+                        output.Append($"    public DateTime? {property.Name} {{ get;set; }} \r\n");
                         break;
                     case "System.DateTime":
-                        output.Append($"    public DateTime {property.Name} {{get;set;}} \r\n");
+                        output.Append($"    public DateTime {property.Name} {{ get;set; }} \r\n");
                         break;
                     case "decimal?":
                     case "decimal":
@@ -244,44 +230,27 @@ internal static class TemplateMap
                     case "int":
                     case "double?":
                     case "double":
-                        output.Append($"    public {property.Type.CodeName} {property.Name} {{get;set;}} \r\n");
+                        output.Append($"    public {property.Type.CodeName} {property.Name} {{ get;set; }} \r\n");
                         break;
                     default:
                         if (property.Type.CodeName.Any(x => x == '?'))
                         {
-                            output.Append($"    public {property.Type.CodeName} {property.Name} {{get;set;}} \r\n");
+                            output.Append($"    public {property.Type.CodeName} {property.Name} {{ get;set; }} \r\n");
                         }
                         else
                         {
                             if (property.Type.IsOptional)
                             {
-                                output.Append($"    public {property.Type.CodeName}? {property.Name} {{get;set;}} \r\n");
+                                output.Append($"    public {property.Type.CodeName}? {property.Name} {{ get;set; }} \r\n");
                             }
                             else
                             {
-                                output.Append($"    public {property.Type.CodeName} {property.Name} {{get;set;}} \r\n");
+                                output.Append($"    public {property.Type.CodeName} {property.Name} {{ get;set; }} \r\n");
                             }
                         }
                         break;
                 }
 
-            }
-        }
-        return output.ToString();
-    }
-    private static string CreateImportFuncExpression(IntellisenseObject classObject)
-    {
-        var output = new StringBuilder();
-        foreach (var property in classObject.Properties.Where(x => x.Type.IsKnownType == true))
-        {
-            if (property.Name == PRIMARYKEY) continue;
-            if (property.Type.CodeName.StartsWith("bool"))
-            {
-                output.Append($"{{ _localizer[_dto.GetMemberDescription(x=>x.{property.Name})], (row, item) => item.{property.Name} =Convert.ToBoolean(row[_localizer[_dto.GetMemberDescription(x=>x.{property.Name})]]) }}, \r\n");
-            }
-            else
-            {
-                output.Append($"{{ _localizer[_dto.GetMemberDescription(x=>x.{property.Name})], (row, item) => item.{property.Name} = row[_localizer[_dto.GetMemberDescription(x=>x.{property.Name})]].ToString() }}, \r\n");
             }
         }
         return output.ToString();
@@ -296,30 +265,21 @@ internal static class TemplateMap
         }
         return output.ToString();
     }
-    private static string CreateExportFuncExpression(IntellisenseObject classObject)
-    {
-        var output = new StringBuilder();
-        foreach (var property in classObject.Properties.Where(x => x.Type.IsKnownType == true))
-        {
-            output.Append($"{{_localizer[_dto.GetMemberDescription(x=>x.{property.Name})],item => item.{property.Name}}}, \r\n");
-        }
-        return output.ToString();
-    }
 
     private static string CreateMudTdHeaderDefinition(IntellisenseObject classObject)
     {
         var output = new StringBuilder();
-        var defaultfieldName = new string[] { "Name", "Description" };
-        if (classObject.Properties.Where(x => x.Type.IsKnownType == true && defaultfieldName.Contains(x.Name)).Any())
+        var defaultFieldName = new string[] { "Name", "Description" };
+        if (classObject.Properties.Where(x => x.Type.IsKnownType == true && defaultFieldName.Contains(x.Name)).Any())
         {
             output.Append($"<PropertyColumn Property=\"x => x.Name\" Title=\"@L[_currentDto.GetMemberDescription(x=>x.Name)]\"> \r\n");
             output.Append("   <CellTemplate>\r\n");
             output.Append($"      <div class=\"d-flex flex-column\">\r\n");
-            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultfieldName.First()).Any())
+            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultFieldName.First()).Any())
             {
                 output.Append($"        <MudText Typo=\"Typo.body2\">@context.Item.Name</MudText>\r\n");
             }
-            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultfieldName.Last()).Any())
+            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultFieldName.Last()).Any())
             {
                 output.Append($"        <MudText Typo=\"Typo.body2\" Class=\"mud-text-secondary\">@context.Item.Description</MudText>\r\n");
             }
@@ -327,60 +287,11 @@ internal static class TemplateMap
             output.Append("    </CellTemplate>\r\n");
             output.Append($"</PropertyColumn>\r\n");
         }
-        foreach (var property in classObject.Properties.Where(x => !defaultfieldName.Contains(x.Name)))
+        foreach (var property in classObject.Properties.Where(x => !defaultFieldName.Contains(x.Name)))
         {
             if (property.Name == PRIMARYKEY) continue;
             output.Append("                ");
             output.Append($"<PropertyColumn Property=\"x => x.{property.Name}\" Title=\"@L[_currentDto.GetMemberDescription(x=>x.{property.Name})]\" />\r\n");
-        }
-        return output.ToString();
-    }
-
-    private static string CreateMudTdDefinition(IntellisenseObject classObject)
-    {
-        var output = new StringBuilder();
-        var defaultfieldName = new string[] { "Name", "Description" };
-        if (classObject.Properties.Where(x => x.Type.IsKnownType == true && defaultfieldName.Contains(x.Name)).Any())
-        {
-            output.Append($"<MudTd HideSmall=\"false\" DataLabel=\"@L[_currentDto.GetMemberDescription(x=>x.Name)]\"> \r\n");
-            output.Append("                ");
-            output.Append($"    <div class=\"d-flex flex-column\">\r\n");
-            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultfieldName.First()).Any())
-            {
-                output.Append("                ");
-                output.Append($"        <MudText>@context.Name</MudText>\r\n");
-            }
-            if (classObject.Properties.Where(x => x.Type.IsKnownType == true && x.Name == defaultfieldName.Last()).Any())
-            {
-                output.Append("                ");
-                output.Append($"        <MudText Typo=\"Typo.body2\" Class=\"mud-text-secondary\">@context.Description</MudText>\r\n");
-            }
-            output.Append("                ");
-            output.Append($"    </div>\r\n");
-            output.Append("                ");
-            output.Append($"</MudTd>\r\n");
-        }
-        foreach (var property in classObject.Properties.Where(x => x.Type.IsKnownType == true && !defaultfieldName.Contains(x.Name)))
-        {
-            if (property.Name == PRIMARYKEY) continue;
-            output.Append("                ");
-            if (property.Type.CodeName.StartsWith("bool", StringComparison.OrdinalIgnoreCase))
-            {
-                output.Append($"        <MudTd HideSmall=\"false\" DataLabel=\"@L[_currentDto.GetMemberDescription(x=>x.{property.Name})]\" ><MudCheckBox Checked=\"@context.{property.Name}\" ReadOnly></MudCheckBox></MudTd> \r\n");
-            }
-            else if (property.Type.CodeName.Equals("System.DateTime", StringComparison.OrdinalIgnoreCase))
-            {
-                output.Append($"        <MudTd HideSmall=\"false\" DataLabel=\"@L[_currentDto.GetMemberDescription(x=>x.{property.Name}))]\" >@context.{property.Name}.Date.ToString(\"d\")</MudTd> \r\n");
-            }
-            else if (property.Type.CodeName.Equals("System.DateTime?", StringComparison.OrdinalIgnoreCase))
-            {
-                output.Append($"        <MudTd HideSmall=\"false\" DataLabel=\"@L[_currentDto.GetMemberDescription(x=>x{property.Name})]\" >@context.{property.Name}?.Date.ToString(\"d\")</MudTd> \r\n");
-            }
-            else
-            {
-                output.Append($"        <MudTd HideSmall=\"false\" DataLabel=\"@L[_currentDto.GetMemberDescription(x=>.{property.Name})]\" >@context.{property.Name}</MudTd> \r\n");
-            }
-
         }
         return output.ToString();
     }
@@ -459,7 +370,6 @@ internal static class TemplateMap
         }
         return output.ToString();
     }
-
 
     private static string CreateFieldAssignmentDefinition(IntellisenseObject classObject)
     {

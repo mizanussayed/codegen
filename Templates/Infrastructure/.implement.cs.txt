@@ -1,0 +1,83 @@
+﻿using Lib.DBAccess.Builder;
+using Lib.DBAccess.NonQueries;
+using Lib.DBAccess.Queries;
+using Lib.ErrorOr;
+
+using {domainRootNs}.{nameofPlural}.Entity;
+using {domainRootNs}.{nameofPlural}.Repository;
+
+using {infrastructureRootNs}.Configurations.DbContexts;
+
+
+namespace {infrastructureRootNs}.{nameofPlural};
+
+internal sealed class {itemName}Repository(OracleCFDBDbContext dbContext) : I{itemName}Repository
+{
+    public async Task<ErrorOr<IEnumerable<{itemName}>>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var parameters = ParameterBuilder
+                         .Oracle()
+                         .BuildForQuery();
+        var dbResult = await dbContext.QueryListAsync<{itemName}>({itemName}ProcedureNames.SP_GET_ALL_{itemNameUpper}, parameters, {itemName}.MapFromDbWithReader, cancellationToken).ConfigureAwait(false);
+        if (!dbResult.Success)
+        {
+            return Error.Unexpected(dbResult.ErrorMessage ?? "Failed to get all {itemNameLower}.");
+        }
+        return dbResult.Data;
+    }
+
+    public async Task<ErrorOr<{itemName}?>> GetAsync(long id, CancellationToken cancellationToken)
+    {
+        var parameters = ParameterBuilder
+                         .Oracle()
+                        // .AddIntParameter("P_ID", id)
+                         .BuildForQuery();
+        var dbResult = await dbContext.QueryFirstAsync<{itemName}>({itemName}ProcedureNames.SP_GET_{itemNameUpper}, parameters, {itemName}.MapFromDbWithReader, cancellationToken).ConfigureAwait(false);
+        if (!dbResult.Success)
+        {
+            return Error.Unexpected(dbResult.ErrorMessage ?? "Failed to get {itemNameLower}.");
+        }
+        return dbResult.Data;
+    }
+
+    public async Task<ErrorOr<bool>> CreateAsync({itemName} entity, CancellationToken cancellationToken)
+    {
+        var parameters = ParameterBuilder
+                         .Oracle()
+                         .Build();
+
+        var  dbResult = await dbContext.ExecuteNonQueryAsync({itemName}ProcedureNames.SP_CREATE_{itemNameUpper}, parameters, cancellationToken).ConfigureAwait(false);
+        if (!dbResult.Success)
+        {
+            return Error.Unexpected(dbResult.ErrorMessage ?? "Failed to create {itemNameLower}.");
+        }
+        return dbResult.Success;
+    }
+
+    public async Task<ErrorOr<bool>> DeleteAsync(long id, CancellationToken cancellationToken)
+    {
+        var parameters = ParameterBuilder
+                         .Oracle()
+                         .Build();
+        var  dbResult = await dbContext.ExecuteNonQueryAsync({itemName}ProcedureNames.SP_DELETE_{itemNameUpper}, parameters, cancellationToken).ConfigureAwait(false);
+        if (!dbResult.Success)
+        {
+            return Error.Unexpected(dbResult.ErrorMessage ?? "Failed to delete {itemNameLower}.");
+        }
+        return dbResult.Success;
+    }
+
+    public async Task<ErrorOr<bool>> UpdateAsync({itemName} entity, CancellationToken cancellationToken)
+    {
+        var parameters = ParameterBuilder
+                  .Oracle()
+                  .Build();
+
+        var dbResult = await dbContext.ExecuteNonQueryAsync({itemName}ProcedureNames.SP_UPDATE_{itemNameUpper}, parameters, cancellationToken).ConfigureAwait(false);
+        if (!dbResult.Success)
+        {
+            return Error.Unexpected(dbResult.ErrorMessage ?? "Failed to create {itemNameLower}.");
+        }
+        return dbResult.Success;
+    }
+}

@@ -27,19 +27,17 @@ namespace CodeGen;
 [Guid(PackageGuids.CodeGenString)]
 public sealed class CodeGenPackage : AsyncPackage
 {
-    public const string DOMAINPROJECT = "Domain";
-    public const string UIPROJECT = "Web";
-    public const string INFRASTRUCTUREPROJECT = "Infrastructure";
-    public const string APPLICATIONPROJECT = "Application";
+    public static string CORE_PROJECT = ".Core";
+    public static string API_PROJECT = ".Api";
+    public static string INFRASTRUCTURE_PROJECT = ".Infrastructure";
 
     private const string _solutionItemsProjectName = "Solution Items";
     private static readonly Regex _reservedFileNamePattern = new($@"(?i)^(PRN|AUX|NUL|CON|COM\d|LPT\d)(\.|$)");
     private static readonly HashSet<char> _invalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
-    public static string DomainRootNs = "";
-    public static string ApplicaitonRootNs = "";
+    public static string CoreRootNs = "";
     public static string InfrastructureRootNs = "";
-    public static string WebRootNs = "";
+    public static string ApiRootNs = "";
 
     public static DTE2 _dte;
 
@@ -63,24 +61,24 @@ public sealed class CodeGenPackage : AsyncPackage
     private void Execute(object sender, EventArgs e)
     {
         NewItemTarget target = NewItemTarget.Create(_dte);
-        NewItemTarget domain = NewItemTarget.Create(_dte, DOMAINPROJECT);
-        NewItemTarget infrastructure = NewItemTarget.Create(_dte, INFRASTRUCTUREPROJECT);
-        NewItemTarget ui = NewItemTarget.Create(_dte, UIPROJECT);
-        NewItemTarget application = NewItemTarget.Create(_dte, APPLICATIONPROJECT);
+        var projectPrefix = target.Project?.Name.Substring(0, target.Project.Name.IndexOf(".Core"));
 
-        DomainRootNs = domain.Project.GetRootNamespace();
-        ApplicaitonRootNs = application.Project.GetRootNamespace();
+        NewItemTarget domain = NewItemTarget.Create(_dte, projectPrefix + CORE_PROJECT);
+        NewItemTarget infrastructure = NewItemTarget.Create(_dte, projectPrefix + INFRASTRUCTURE_PROJECT);
+        NewItemTarget api = NewItemTarget.Create(_dte, projectPrefix + API_PROJECT);
+
+        CoreRootNs = domain.Project.GetRootNamespace();
         InfrastructureRootNs = infrastructure.Project.GetRootNamespace();
-        WebRootNs = ui.Project.GetRootNamespace();
+        ApiRootNs = api.Project.GetRootNamespace();
 
-        var includes = new string[] { "IEntity", "BaseEntity", "BaseAuditableEntity", "BaseAuditableSoftDeleteEntity", "AuditTrail", "OwnerPropertyEntity" };
-        var objectlist = ProjectHelpers.GetEntities(domain.Project)
+        var includes = new string[] { "IEntity", "BaseEntity" };
+        var objectList = ProjectHelpers.GetEntities(domain.Project)
             .Where(x => includes.Contains(x.BaseName) && !includes.Contains(x.Name));
-        var entities = objectlist.Select(x => x.Name).Distinct().ToArray();
-        if (target == null && target.Project.Name == APPLICATIONPROJECT)
+        var entities = objectList.Select(x => x.Name).Distinct().ToArray();
+        if (target == null && target.Project?.Name == projectPrefix + CORE_PROJECT)
         {
             MessageBox.Show(
-                    "Unable to determine the location for creating the new file. Please select a folder within the Application Project in the Explorer and try again.",
+                    "Unable to determine the location for creating the new file. Please select a folder within the Core Project in the Explorer and try again.",
                     Vsix.Name,
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -96,81 +94,57 @@ public sealed class CodeGenPackage : AsyncPackage
 
         string[] parsedInputs = GetParsedInput(input);
 
-        foreach (string inputname in parsedInputs)
+        foreach (string inputName in parsedInputs)
         {
             try
             {
-                var name = Path.GetFileNameWithoutExtension(inputname);
+                var name = Path.GetFileNameWithoutExtension(inputName);
                 var nameofPlural = ProjectHelpers.Pluralize(name);
-                var objectClass = objectlist.Where(x => x.Name == name).First();
+                var objectClass = objectList.Where(x => x.Name == name).First();
 
-                // For Domain Event
-                //var events = new List<string>() {
-                //        $"Events/{name}CreatedEvent.cs",
-                //        $"Events/{name}DeletedEvent.cs",
-                //        $"Events/{name}UpdatedEvent.cs",
-                //        };
-                //foreach (var item in events)
-                //{
-                //    AddItemAsync(objectClass, item, name, domain).Forget();
-                //}
 
-                var configurations = new List<string>() {
-                         $"Data/Configurations/{name}Configuration.cs"
-                        };
-                foreach (var item in configurations)
-                {
-                    AddItemAsync(objectClass, item, name, infrastructure).Forget();
-                }
-
+                // For Core 
                 var list = new List<string>()
                     {
-                        //$"{nameofPlural}/Commands/AddEdit/AddEdit{name}Command.cs",
-                        //$"{nameofPlural}/Commands/AddEdit/AddEdit{name}CommandValidator.cs",
-                        $"{nameofPlural}/Commands/Create/Create{name}Command.cs",
-                        $"{nameofPlural}/Commands/Create/Create{name}CommandValidator.cs",
-                        $"{nameofPlural}/Commands/Delete/Delete{name}Command.cs",
-                        //$"{nameofPlural}/Commands/Delete{name}CommandValidator.cs",
-                        $"{nameofPlural}/Commands/Update/Update{name}Command.cs",
-                        $"{nameofPlural}/Commands/Update/Update{name}CommandValidator.cs",
-                        //$"{nameofPlural}/Commands/Import/Import{nameofPlural}Command.cs",
-                        //$"{nameofPlural}/Commands/Import/Import{nameofPlural}CommandValidator.cs",
-                        //$"{nameofPlural}/Caching/{name}CacheKey.cs",
-                        //$"{nameofPlural}/DTOs/{name}Dto.cs",
-                        //$"{nameofPlural}/EventHandlers/{name}CreatedEventHandler.cs",
-                        //$"{nameofPlural}/EventHandlers/{name}UpdatedEventHandler.cs",
-                        //$"{nameofPlural}/EventHandlers/{name}DeletedEventHandler.cs",
-                        //$"{nameofPlural}/Specifications/{name}AdvancedFilter.cs",
-                        //$"{nameofPlural}/Specifications/{name}AdvancedSpecification.cs",
-                        //$"{nameofPlural}/Specifications/{name}ByIdSpecification.cs",
-                        //$"{nameofPlural}/Queries/Export/Export{nameofPlural}Query.cs",
-                        $"{nameofPlural}/Queries/GetAll/GetAll{nameofPlural}Query.cs",
-                        $"{nameofPlural}/Queries/GetById/Get{name}ByIdQuery.cs",
-                        $"{nameofPlural}/Queries/Response/{name}Response.cs"
-                        
-                        //$"{nameofPlural}/Queries/Pagination/{nameofPlural}PaginationQuery.cs",
-
+                    $"Model/{name}ResponseModel.cs",
+                    $"Model/{name}RequestModel.cs",
+                    $"Repository/I{name}Repository.cs",
+                    $"Service/{name}Service.cs",
+                    $"Validator/{name}RequestModelValidator.cs",
+                    $"CoreResolver/{name}DependencyResolver.cs",
                     };
+
                 foreach (var item in list)
                 {
                     AddItemAsync(objectClass, item, name, target).Forget();
                 }
 
+                // For  infrastructure
+                var repo = new List<string>() {
+                        $"Infrastructure/{nameofPlural}/{name}Implement.cs",
+                        $"Infrastructure/{nameofPlural}/{name}ProcedureNames.cs",
+                        $"Infrastructure/{nameofPlural}/{name}DependencyResolver.cs",
+                        };
+                foreach (var item in repo)
+                {
+                    AddItemAsync(objectClass, item, name, infrastructure).Forget();
+                }
+
                 // Add Endpoints
                 var pages = new List<string>()
                     {
-                        $"Endpoints/{nameofPlural}.cs",
+                        $"Controllers/{nameofPlural}/{name}Api.cs",
                     };
                 foreach (var item in pages)
                 {
-                    AddItemAsync(objectClass, item, name, ui).Forget();
+                    AddItemAsync(objectClass, item, name, api).Forget();
                 }
             }
             catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))
             {
                 Logger.Log(ex);
                 MessageBox.Show(
-                        $"Error creating file '{inputname}':{Environment.NewLine}{ex.Message}",
+                        $"Error creating file '{inputName}':{Environment.NewLine}{ex.Message}",
                         Vsix.Name,
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
@@ -318,38 +292,27 @@ public sealed class CodeGenPackage : AsyncPackage
     {
         string folderName = string.Empty;
 
-        bool containsCommands = file.Contains("Commands");
-        bool containsQueries = file.Contains("Queries");
+        bool IsCoreResolver = file.Contains("CoreResolver");
+        bool IsInfrastructure = file.Contains("Infrastructure");
 
-        if (!containsCommands && !containsQueries)
+        if (!IsCoreResolver && !IsInfrastructure)
         {
             return file;
         }
 
-        if (file.Contains("Create"))
+        if (file.Contains("CoreResolver"))
         {
-            folderName = "Create";
+            folderName = "CoreResolver";
         }
-        if (file.Contains("Update"))
+        if (file.Contains("Infrastructure"))
         {
-            folderName = "Update";
+            folderName = "Infrastructure";
         }
-        if (file.Contains("Delete"))
+        if (file.Contains("Infrastructure") && file.Contains("Implement"))
         {
-            folderName = "Delete";
+           file =  file.Replace("Implement", "Repository");
         }
-        if (file.Contains("GetAll"))
-        {
-            folderName = "GetAll";
-        }
-        if (file.Contains("GetById"))
-        {
-            folderName = "GetById";
-        }
-        if (file.Contains("Response"))
-        {
-            folderName = "Response";
-        }
+
         int indexOfFolderName = file.IndexOf(folderName);
         StringBuilder modifiedFile = new(file.Substring(0, indexOfFolderName));
         modifiedFile.Append(file.Substring(indexOfFolderName + folderName.Length + tailSlashRemove));

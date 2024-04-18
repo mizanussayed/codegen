@@ -1,0 +1,8 @@
+﻿namespace {namespace};
+
+public sealed class {itemName}RequestModel
+{
+    public long Id { get; set; }
+    {dtoFieldDefinition}
+}
+

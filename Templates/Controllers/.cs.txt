@@ -1,0 +1,83 @@
+﻿using Lib.ErrorOr;
+
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+
+using {apiRootNs}.Configurations.MinimalApi;
+using {apiRootNs}.Configurations.Response;
+using {domainRootNs}.{nameofPlural}.Model;
+using {domainRootNs}.{nameofPlural}.Service;
+
+namespace {namespace};
+
+public class {itemName}Api : IEndpoint
+{
+    public void MapRoutes(IEndpointRouteBuilder routes)
+    {
+        var group = routes.MapGroup("/api/{itemNameLower}").WithTags("{itemName}");
+
+
+        group.MapGet("/get-all-{itemNameLower}", GetAll{itemName})
+            .WithOpenApi()
+            .WithSummary("all version");
+
+        group.MapGet("/get-{itemNameLower}/{id}", Get{itemName});
+        group.MapPost("/create-{itemNameLower}", Create{itemName});
+        group.MapPut("/update-{itemNameLower}/{id}", Update{itemName});
+        group.MapDelete("/delete-{itemNameLower}/{id}", Delete{itemName});
+    }
+
+    private static async Task<Results<Ok<ApiResponse<IEnumerable<{itemName}ResponseModel>>>, JsonHttpResult<ApiResponse<IEnumerable<{itemName}ResponseModel>>>>> GetAll{itemName}([FromServices] {itemName}Service service, CancellationToken cancellationToken)
+    {
+        var result = await service.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        if (result.IsError)
+        {
+            return ApiResponseResult.Problem<IEnumerable<{itemName}ResponseModel>>(result.Error);
+        }
+
+        return ApiResponseResult.Success(result.Value);
+    }
+    private static async Task<Results<Ok<ApiResponse<{itemName}ResponseModel>>, JsonHttpResult<ApiResponse<{itemName}ResponseModel>>>> Get{itemName}([FromServices] {itemName}Service service, int id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        if (result.IsError)
+        {
+            return ApiResponseResult.Problem<{itemName}ResponseModel>(result.Error);
+        }
+
+        return ApiResponseResult.Success(result.Value);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<Success>>, JsonHttpResult<ApiResponse<Success>>>> Create{itemName}([FromServices] {itemName}Service service, {itemName}RequestModel model, CancellationToken cancellationToken)
+    {
+        var result = await service.CreateAsync(model, cancellationToken).ConfigureAwait(false);
+        if (result.IsError)
+        {
+            return ApiResponseResult.Problem<Success>(result.Error);
+        }
+
+        return ApiResponseResult.Success(result.Value);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<Success>>, JsonHttpResult<ApiResponse<Success>>>> Update{itemName}([FromServices] {itemName}Service service, {itemName}RequestModel model, CancellationToken cancellationToken)
+    {
+        var result = await service.UpdateAsync(model, cancellationToken).ConfigureAwait(false);
+        if (result.IsError)
+        {
+            return ApiResponseResult.Problem<Success>(result.Error);
+        }
+
+        return ApiResponseResult.Success(result.Value);
+    }
+
+    private static async Task<Results<Ok<ApiResponse<Success>>, JsonHttpResult<ApiResponse<Success>>>> Delete{itemName}([FromServices] {itemName}Service service, int id, CancellationToken cancellationToken)
+    {
+        var result = await service.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
+        if (result.IsError)
+        {
+            return ApiResponseResult.Problem<Success>(result.Error);
+        }
+
+        return ApiResponseResult.Success(result.Value);
+    }
+}

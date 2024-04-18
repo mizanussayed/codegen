@@ -3,7 +3,6 @@ using CodeGen.Models;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-
 namespace CodeGen.Services;
 
 internal static class IntellisenseWriter
@@ -16,9 +15,9 @@ internal static class IntellisenseWriter
 
         foreach (IGrouping<string, IntellisenseObject> ns in objects.GroupBy(o => o.Namespace))
         {
-            
-                sb.AppendFormat("declare module {0} {{\r\n", ns.Key);
-           
+
+            sb.AppendFormat("declare module {0} {{\r\n", ns.Key);
+
 
             foreach (IntellisenseObject io in ns)
             {
@@ -29,29 +28,28 @@ internal static class IntellisenseWriter
 
                 if (io.IsEnum)
                 {
-                   
-                        sb.AppendLine("\tconst enum " + Utility.CamelCaseClassName(io.Name) + " {");
 
-                        foreach (IntellisenseProperty p in io.Properties)
+                    sb.AppendLine("\tconst enum " + Utility.CamelCaseClassName(io.Name) + " {");
+
+                    foreach (IntellisenseProperty p in io.Properties)
+                    {
+                        WriteTypeScriptComment(p, sb);
+
+                        if (p.InitExpression != null)
                         {
-                            WriteTypeScriptComment(p, sb);
-
-                            if (p.InitExpression != null)
-                            {
-                                sb.AppendLine("\t\t" + Utility.CamelCaseEnumValue(p.Name) + " = " + CleanEnumInitValue(p.InitExpression) + ",");
-                            }
-                            else
-                            {
-                                sb.AppendLine("\t\t" + Utility.CamelCaseEnumValue(p.Name) + ",");
-                            }
+                            sb.AppendLine("\t\t" + Utility.CamelCaseEnumValue(p.Name) + " = " + CleanEnumInitValue(p.InitExpression) + ",");
                         }
+                        else
+                        {
+                            sb.AppendLine("\t\t" + Utility.CamelCaseEnumValue(p.Name) + ",");
+                        }
+                    }
 
-                        sb.AppendLine("\t}");
-                    
+                    sb.AppendLine("\t}");
                 }
                 else
                 {
-                    var type =  "\tinterface ";
+                    var type = "\tinterface ";
                     sb.Append(type).Append(Utility.CamelCaseClassName(io.Name)).Append(" ");
 
                     if (!string.IsNullOrEmpty(io.BaseName))
@@ -71,9 +69,7 @@ internal static class IntellisenseWriter
                 }
             }
 
-           
-                sb.AppendLine("}");
-           
+            sb.AppendLine("}");
         }
 
         return sb.ToString();

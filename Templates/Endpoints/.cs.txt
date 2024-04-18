@@ -16,22 +16,22 @@ public class {nameofPlural} : EndpointGroupBase
             .MapDelete(Delete, "{id}");
     }
 
-    public async Task<PaginatedList<{itemname}Response>> GetAll(ISender sender, [AsParameters] GetAll{nameofPlural}Query query)
+    public async Task<PaginatedList<{itemName}Response>> GetAll(ISender sender, [AsParameters] GetAll{nameofPlural}Query query)
     {
         return await sender.Send(query);
     }
 
-    public async Task<{itemname}Response> GetById(ISender sender, int id)
+    public async Task<{itemName}Response> GetById(ISender sender, int id)
     {
-        return await sender.Send(new Get{itemname}ByIdQuery(id));
+        return await sender.Send(new Get{itemName}ByIdQuery(id));
     }
 
-    public async Task<int> Create(ISender sender, Create{itemname}Command command)
+    public async Task<int> Create(ISender sender, Create{itemName}Command command)
     {
         return await sender.Send(command);
     }
 
-    public async Task<IResult> Update(ISender sender, int id, Update{itemname}Command command)
+    public async Task<IResult> Update(ISender sender, int id, Update{itemName}Command command)
     {
         if (id != command.Id) return Results.BadRequest();
         await sender.Send(command);
@@ -40,7 +40,7 @@ public class {nameofPlural} : EndpointGroupBase
 
     public async Task<IResult> Delete(ISender sender, int id)
     {
-        await sender.Send(new Delete{itemname}Command(id));
+        await sender.Send(new Delete{itemName}Command(id));
         return Results.NoContent();
     }
 }

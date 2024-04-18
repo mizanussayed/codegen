@@ -1,0 +1,14 @@
+using Microsoft.Extensions.DependencyInjection;
+
+using {domainRootNs}.{nameofPlural}.Service;
+using {domainRootNs}.Configurations.Injector;
+
+namespace {domainRootNs}.{nameofPlural};
+
+internal sealed class {itemName}DependencyResolver : IInjectServices
+{
+    public void Configure(IServiceCollection services)
+    {
+        services.AddScoped<{itemName}Service>();
+    }
+}

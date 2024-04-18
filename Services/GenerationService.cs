@@ -37,10 +37,10 @@ public sealed class GenerationService : IWpfTextViewCreationListener
 
     private void FileActionOccurred(object sender, TextDocumentFileActionEventArgs e)
     {
-        if (e.FileActionType != FileActionTypes.ContentSavedToDisk)
+        if (e?.FileActionType != FileActionTypes.ContentSavedToDisk)
             return;
-        _item = VSHelpers.GetProjectItem(e.FilePath);
-        string fileName = GenerationService.GenerateFileName(e.FilePath);
+        _item = VSHelpers.GetProjectItem(e?.FilePath);
+        string fileName = GenerateFileName(e?.FilePath);
 
         if (File.Exists(fileName))
         {
@@ -52,14 +52,14 @@ public sealed class GenerationService : IWpfTextViewCreationListener
     {
         try
         {
-            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Started", sourceItem.Name));
+            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Started", sourceItem?.Name));
             var list = IntellisenseParser.ProcessFile(sourceItem);
-            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Completed", sourceItem.Name));
+            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Completed", sourceItem?.Name));
             return IntellisenseWriter.WriteTypeScript(list);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Failure", sourceItem.Name));
+            VSHelpers.WriteOnOutputWindow(string.Format("{0} - Failure", sourceItem?.Name));
             return null;
         }
     }
@@ -73,7 +73,7 @@ public sealed class GenerationService : IWpfTextViewCreationListener
 
     public static void CreateDtsFile(ProjectItem sourceItem)
     {
-        string sourceFile = sourceItem.FileNames[1];
+        string sourceFile = sourceItem?.FileNames[1];
         string dtsFile = GenerationService.GenerateFileName(sourceFile);
         string dts = ConvertToTypeScript(sourceItem);
 
@@ -87,7 +87,7 @@ public sealed class GenerationService : IWpfTextViewCreationListener
                 var dtsItem = VSHelpers.GetProjectItem(dtsFile);
 
                 if (dtsItem != null)
-                    dtsItem.Properties.Item("DependentUpon").Value = sourceItem.Name;
+                    dtsItem.Properties.Item("DependentUpon").Value = sourceItem?.Name;
 
             }), DispatcherPriority.ApplicationIdle, null);
         }

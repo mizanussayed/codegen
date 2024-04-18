@@ -1,0 +1,9 @@
+﻿namespace {infrastructureRootNs}.{nameofPlural};
+internal class {itemName}ProcedureNames
+{
+    public const string SP_GET_ALL_{itemNameUpper} = "SP_GET_ALL_{itemNameUpper}";
+    public const string SP_GET_{itemNameUpper} = "SP_GET_{itemNameUpper}";
+    public const string SP_CREATE_{itemNameUpper} = "SP_CREATE_{itemNameUpper}";
+    public const string SP_DELETE_{itemNameUpper} = "SP_DELETE_{itemNameUpper}";
+    public const string SP_UPDATE_{itemNameUpper} = "SP_UPDATE_{itemNameUpper}";
+}

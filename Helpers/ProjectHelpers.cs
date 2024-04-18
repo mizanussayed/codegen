@@ -191,18 +191,18 @@ public static class ProjectHelpers
 	{
 		foreach (Project project in projects)
 		{
-			var projectName = project.Name;
+			var projectName = project?.Name;
 			if (projectName == name)
 			{
 				return project;
 			}
-			else if (project.Kind is ProjectKinds.vsProjectKindSolutionFolder)
+			else if (project?.Kind is ProjectKinds.vsProjectKindSolutionFolder)
 			{
-				var subProjects = project
+				var subProjects = project?
 						.ProjectItems
 						.OfType<ProjectItem>()
-						.Where(item => item.SubProject != null)
-						.Select(item => item.SubProject);
+						.Where(item => item?.SubProject != null)
+						.Select(item => item?.SubProject);
 
 				var projectInFolder = GetProject(subProjects, name);
 
