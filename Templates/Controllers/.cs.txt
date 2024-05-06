@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using {apiRootNs}.Configurations.MinimalApi;
 using {apiRootNs}.Configurations.Response;
-using {domainRootNs}.{nameofPlural}.Model;
-using {domainRootNs}.{nameofPlural}.Service;
+using {domainRootNs}.Features.{nameofPlural}.Model;
+using {domainRootNs}.Features.{nameofPlural}.Service;
 
 namespace {namespace};
 

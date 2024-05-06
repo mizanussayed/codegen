@@ -1,4 +1,5 @@
 ﻿namespace {infrastructureRootNs}.{nameofPlural};
+
 internal class {itemName}ProcedureNames
 {
     public const string SP_GET_ALL_{itemNameUpper} = "SP_GET_ALL_{itemNameUpper}";

@@ -3,8 +3,8 @@ using Lib.DBAccess.NonQueries;
 using Lib.DBAccess.Queries;
 using Lib.ErrorOr;
 
-using {domainRootNs}.{nameofPlural}.Entity;
-using {domainRootNs}.{nameofPlural}.Repository;
+using {domainRootNs}.Features.{nameofPlural}.Entity;
+using {domainRootNs}.Features.{nameofPlural}.Repository;
 
 using {infrastructureRootNs}.Configurations.DbContexts;
 

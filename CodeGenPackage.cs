@@ -121,9 +121,9 @@ public sealed class CodeGenPackage : AsyncPackage
 
                 // For  infrastructure
                 var repo = new List<string>() {
-                        $"Infrastructure/{nameofPlural}/{name}Implement.cs",
-                        $"Infrastructure/{nameofPlural}/{name}ProcedureNames.cs",
-                        $"Infrastructure/{nameofPlural}/{name}DependencyResolver.cs",
+                        $"Infrastructure/Repositories/{nameofPlural}/{name}Implement.cs",
+                        $"Infrastructure/Repositories/{nameofPlural}/{name}ProcedureNames.cs",
+                        $"Infrastructure/Repositories/{nameofPlural}/{name}DependencyResolver.cs",
                         };
                 foreach (var item in repo)
                 {

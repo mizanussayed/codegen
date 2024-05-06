@@ -1,6 +1,6 @@
 ﻿using Lib.ErrorOr;
 
-using {domainRootNs}.{nameofPlural}.Entity;
+using {domainRootNs}.Features.{nameofPlural}.Entity;
 
 namespace {namespace};
 

@@ -99,9 +99,6 @@
     <Content Include="Templates\Controllers\.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Templates\Endpoints\.cs.txt">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Templates\Model\.request.cs.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

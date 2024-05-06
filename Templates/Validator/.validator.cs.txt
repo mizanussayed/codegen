@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-using {domainRootNs}.{nameofPlural}.Model;
+using {domainRootNs}.Features.{nameofPlural}.Model;
 
 namespace {domainRootNs}.{nameofPlural}.Validators;
 

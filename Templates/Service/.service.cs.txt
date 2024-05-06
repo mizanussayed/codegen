@@ -2,9 +2,9 @@
 
 using Mapster;
 
-using {domainRootNs}.{nameofPlural}.Entity;
-using {domainRootNs}.{nameofPlural}.Model;
-using {domainRootNs}.{nameofPlural}.Repository;
+using {domainRootNs}.Features.{nameofPlural}.Entity;
+using {domainRootNs}.Features.{nameofPlural}.Model;
+using {domainRootNs}.Features.{nameofPlural}.Repository;
 using {domainRootNs}.Configurations.UnitOfWorks;
 
 namespace {namespace};
@@ -14,9 +14,12 @@ public class {itemName}Service(IUnitOfWork unitOfWork)
     public async Task<ErrorOr<IEnumerable<{itemName}ResponseModel>>> GetAllAsync(CancellationToken cancellationToken)
     {
         var repository = unitOfWork.Repository<I{itemName}Repository>();
-
         var dbResult = await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        return dbResult.IsError ? (ErrorOr<IEnumerable<{itemName}ResponseModel>>)dbResult.Error : ErrorOr.From(dbResult.Value.Adapt<IEnumerable<{itemName}ResponseModel>>());
+        if (dbResult.IsError)
+        {
+            return dbResult.Error;
+        }
+        return ErrorOr.From(dbResult.Value.Adapt<IEnumerable<{itemName}ResponseModel>>());
     }
 
     public async Task<ErrorOr<{itemName}ResponseModel>> GetAsync(long id, CancellationToken cancellationToken)
@@ -24,7 +27,11 @@ public class {itemName}Service(IUnitOfWork unitOfWork)
         var repository = unitOfWork.Repository<I{itemName}Repository>();
 
         var dbResult = await repository.GetAsync(id, cancellationToken).ConfigureAwait(false);
-        return dbResult.IsError ? (ErrorOr<{itemName}ResponseModel>)dbResult.Error : dbResult.Value.Adapt<{itemName}ResponseModel>();
+        if (dbResult.IsError)
+        {
+            return dbResult.Error;
+        }
+        return ErrorOr.From(dbResult.Value.Adapt<{itemName}ResponseModel>());
     }
 
     public async Task<ErrorOr<Success>> CreateAsync({itemName}RequestModel requestModel, CancellationToken cancellationToken)
@@ -33,7 +40,11 @@ public class {itemName}Service(IUnitOfWork unitOfWork)
 
         var dbResult = await repository.CreateAsync(requestModel.Adapt<{itemName}>(), cancellationToken).ConfigureAwait(false);
 
-        return dbResult.IsError ? (ErrorOr<Success>)dbResult.Error : (ErrorOr<Success>)SuccessType.Success;
+        if (dbResult.IsError)
+        {
+            return dbResult.Error;
+        }
+        return SuccessType.Success;
     }
 
     public async Task<ErrorOr<Success>> UpdateAsync({itemName}RequestModel requestModel, CancellationToken cancellationToken)
@@ -42,7 +53,11 @@ public class {itemName}Service(IUnitOfWork unitOfWork)
 
         var dbResult = await repository.UpdateAsync(requestModel.Adapt<{itemName}>(), cancellationToken).ConfigureAwait(false);
 
-        return dbResult.IsError ? (ErrorOr<Success>)dbResult.Error : (ErrorOr<Success>)SuccessType.Success;
+        if (dbResult.IsError)
+        {
+            return dbResult.Error;
+        }
+        return SuccessType.Success;
     }
 
     public async Task<ErrorOr<Success>> DeleteAsync(long id, CancellationToken cancellationToken)
@@ -51,6 +66,10 @@ public class {itemName}Service(IUnitOfWork unitOfWork)
 
         var dbResult = await repository.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
 
-        return dbResult.IsError ? (ErrorOr<Success>)dbResult.Error : (ErrorOr<Success>)SuccessType.Success;
+        if (dbResult.IsError)
+        {
+            return dbResult.Error;
+        }
+        return SuccessType.Success;
     }
 }

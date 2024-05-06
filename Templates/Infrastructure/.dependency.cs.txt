@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-using {domainRootNs}.{nameofPlural}.Repository;
+using {domainRootNs}.Features.{nameofPlural}.Repository;
 using {domainRootNs}.Configurations.Injector;
 
 namespace {infrastructureRootNs}.{nameofPlural};
