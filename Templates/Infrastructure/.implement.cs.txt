@@ -43,7 +43,7 @@ internal sealed class {itemName}Repository(OracleCFDBDbContext dbContext) : I{it
     public async Task<ErrorOr<bool>> CreateAsync({itemName} entity, CancellationToken cancellationToken)
     {
         var parameters = ParameterBuilder
-                         .Oracle()
+                         .Oracle(){parameterDefinition}
                          .Build();
 
         var  dbResult = await dbContext.ExecuteNonQueryAsync({itemName}ProcedureNames.SP_CREATE_{itemNameUpper}, parameters, cancellationToken).ConfigureAwait(false);
@@ -70,7 +70,7 @@ internal sealed class {itemName}Repository(OracleCFDBDbContext dbContext) : I{it
     public async Task<ErrorOr<bool>> UpdateAsync({itemName} entity, CancellationToken cancellationToken)
     {
         var parameters = ParameterBuilder
-                  .Oracle()
+                  .Oracle(){parameterDefinition}
                   .Build();
 
         var dbResult = await dbContext.ExecuteNonQueryAsync({itemName}ProcedureNames.SP_UPDATE_{itemNameUpper}, parameters, cancellationToken).ConfigureAwait(false);

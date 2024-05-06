@@ -149,6 +149,7 @@ internal static class TemplateMap
         var content = await reader.ReadToEndAsync();
         var nameofPlural = ProjectHelpers.Pluralize(name);
         var dtoFieldDefinition = CreateDtoFieldDefinition(classObject);
+        var ParameterDefinition = CreateParameterDefinition(classObject);
         var templateFieldDefinition = CreateTemplateFieldDefinition(classObject);
         var fieldAssignmentDefinition = CreateFieldAssignmentDefinition(classObject);
 
@@ -160,6 +161,7 @@ internal static class TemplateMap
                         .Replace("{itemNameLower}", name.ToLower())
                         .Replace("{nameofPlural}", nameofPlural)
                         .Replace("{dtoFieldDefinition}", dtoFieldDefinition)
+                        .Replace("{parameterDefinition}", ParameterDefinition)
                         .Replace("{fieldAssignmentDefinition}", fieldAssignmentDefinition)
                         .Replace("{templateFieldDefinition}", templateFieldDefinition)
                         .Replace("{domainRootNs}", domainRootNs)
@@ -251,6 +253,49 @@ internal static class TemplateMap
                         break;
                 }
 
+            }
+        }
+        return output.ToString();
+    }
+
+    private static string CreateParameterDefinition(IntellisenseObject classObject)
+    {
+        var output = new StringBuilder();
+        foreach (var property in classObject.Properties.Where(x => x.Type.IsKnownType == true))
+        {
+            var parameterName = string.Join(string.Empty, property.Name
+                 .Select(c => new string(c, 1)).Select(c => c[0] < 'Z' ? "_" + c : c)).Trim().ToUpper();
+
+            switch (property.Type.CodeName)
+            {
+                case "string":
+                    output.Append($"\r\n                         .AddVarchar2Parameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "System.DateTime?":
+                    output.Append($"\r\n                         .AddDateTimeParameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "System.DateTime":
+                    output.Append($"\r\n                         .AddDateTimeParameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "bool":
+                    output.Append($"\r\n                         .AddBoolCharParameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "int":
+                case "int?":
+                    output.Append($"\r\n                         .AddIntParameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "int64":
+                    output.Append($"\r\n                         .AddLongParameter(\"P{parameterName}\",  entity.{property.Name})");
+                    break;
+                case "decimal?":
+                case "decimal":
+                case "double?":
+                case "double":
+                    output.Append($"\r\n                         .AddDecimalParameter(\"P{parameterName}\", entity.{property.Name})");
+                    break;
+                default:
+                    output.Append($"\r\n                         .AddIntParameter(\"P{parameterName}\",  (int)entity.{property.Name})");
+                    break;
             }
         }
         return output.ToString();
