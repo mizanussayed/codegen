@@ -1,0 +1,90 @@
+name: Build and Deploy .NET Core Project
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build_and_deploy:
+    name: 'Build and Deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Post to a Slack channel
+        id: slack-start
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: 'C073PTSS7FE'
+          slack-message: "Build & Deployment of BSMAAU project started  ${{ github.event.time }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_AUTH_TOKEN }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0'
+      
+      - name: Restore dependencies
+        run: dotnet --version
+      
+      - name: Build
+        run: dotnet --version
+      
+      # Optionally, run tests or other tasks here.
+      
+      - name: Deploy
+        run: |
+          # Add your deployment script commands here to deploy to 192.168.10.20/apiDemo
+
+      # Other steps here...
+      
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: 'C073PTSS7FE'
+          update-ts: ${{ steps.slack-start.outputs.ts }}
+          payload: |
+            {
+              "text": "Deployment of BSMAAU  project has finished with (${{ job.status }})",
+              "attachments": [
+                {
+                  "color": "#FF0000",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "short": false,
+                      "value": "In-Completed"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_AUTH_TOKEN }}
+
+      - id: slack_end
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: "C073PTSS7FE"
+          update-ts: ${{ steps.slack-start.outputs.ts }}
+          payload: |
+            {
+              "text": "Deployment of BSMAAU  project has finished with (${{ job.status }})",
+              "attachments": [
+                {
+                  "color": "28a745",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "short": true,
+                      "value": "Completed"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.BOT_AUTH_TOKEN }}
