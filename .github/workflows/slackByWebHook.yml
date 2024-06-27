@@ -1,0 +1,49 @@
+name: Build and Deploy  Project
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build_and_deploy:
+    name: 'Build and Deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0' 
+      
+      - name: Restore dependencies
+        run: dotnet --version
+      
+      - name: Build
+        #run: dotnet build --configuration Release
+        run : dotnet --version
+      
+      # Optionally, run tests or other tasks here.
+      
+      - name: Deploy
+        run: |
+          # Add your deployment script commands here to deploy to 192.168.10.20/apiDemo
+
+      - name: Notify Slack on success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          status: 'success'
+          message: 'Deployment of BSMAAU web project was successful at ${{ github.event.time }}.'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFICATIONS_WEB_HOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          status: 'failure'
+          message: 'The deployment of .NET Core project version 8 to 192.168.10.20/apiDemo failed.'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_NOTIFICATIONS_WEB_HOOK_URL }}
