@@ -82,7 +82,7 @@ public sealed class GenerationService : IWpfTextViewCreationListener
 
         if (sourceItem.ContainingProject.IsKind(ProjectTypes.DOTNET_Core, ProjectTypes.ASPNET_5))
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+             _= Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
             {
                 var dtsItem = VSHelpers.GetProjectItem(dtsFile);
 
